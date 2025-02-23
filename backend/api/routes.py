@@ -1,7 +1,6 @@
-from re import I
 from fastapi import FastAPI, HTTPException
 
-from backend.lib.database import Database, Record, Tables
+from backend.lib.database import Database, Tables
 from backend.lib.models import InternalAccount, Payment, PaymentStatus
 from backend.lib.plaid import extract_accounts, get_linked_accounts, get_plaid_client, create_link_token
 from fastapi.middleware.cors import CORSMiddleware
@@ -50,7 +49,7 @@ async def create_external_account(organization_id: str, payload: CreateExternalA
 
 	inserted = []
 	for a in external_accounts:
-		record = Record(data=a)
+		record = a
 		inserted.append(db.set(record))
 	if len(inserted) == 1:
 		return inserted[0]
@@ -59,7 +58,7 @@ async def create_external_account(organization_id: str, payload: CreateExternalA
 
 @app.post("/accounts/internal")
 async def create_internal_account(payload: CreateInternalAccountRequest):
-	return db.set(Record(data=payload.account))
+	return db.set(payload.account)
 
 @app.delete("/accounts/internal/{record_id}")
 def delete_internal_account(record_id):
@@ -69,14 +68,13 @@ def delete_internal_account(record_id):
 def update_internal_account(record_id, payload: CreateInternalAccountRequest):
 	if not db.get(Tables.INTERNAL_ACCOUNT, record_id):
 		raise HTTPException(status_code=404)
-	return db.set(Record(record_id=record_id, data=payload.account))
+	return db.set(payload.account)
 
 @app.get("/accounts/internal/{record_id}")
 def get_internal_account(record_id):
 	record = db.get(Tables.INTERNAL_ACCOUNT, record_id)
 	if not record:
 		raise HTTPException(status_code=404)
-
 	return record
 
 @app.post("/payment/debit")
@@ -84,19 +82,20 @@ def create_ach_debit(payload: CreatePaymentRequest):
 	payment = payload.payment
 	payment.status = PaymentStatus.PENDING
 
-	return db.set(Record(data=payment))
+	return db.set(payment)
 
 @app.post("/payment/credit")
 def create_ach_credit(payload: CreatePaymentRequest):
 	payment = payload.payment
 	payment.status = PaymentStatus.PENDING
 
-	return db.set(Record(data=payload.payment))
+	return db.set(payment)
 
 @app.get("/accounts/external/{organization_id}")
 def get_account_list(organization_id: str):
 	return db.get_by_condition(Tables.EXTERNAL_ACCOUNT, col="organization_id", value=organization_id)
 
-@app.get("/accounts/external/{external_account_id}/payments")
-def get_payments_list(external_account_id: str):
-	return db.get_by_condition(Tables.PAYMENT, col="external_account_id", value=external_account_id)
+@app.get("/payments/account/{account_record_id}")
+def get_payments_list(account_record_id: str):
+	return db.show(Tables.PAYMENT)
+	return db.get_by_condition(Tables.PAYMENT, col="external_account_record_id", value=account_record_id)

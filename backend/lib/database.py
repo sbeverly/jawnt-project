@@ -1,13 +1,12 @@
 from enum import Enum
 from plaid.model_utils import uuid
 from pydantic.main import BaseModel
-from backend.lib.models import ExternalAccount, InternalAccount, Payment
+from backend.lib.models import ExternalAccount, InternalAccount, Payment, Record
 
-class Record(BaseModel):
-	record_id: str | None = None
-	table_name: str | None = None
-	organization_id: str | None = None
-	data: InternalAccount | ExternalAccount | Payment
+# class Record(BaseModel):
+# 	record_id: str | None = None
+# 	table_name: str | None = None
+# 	data: InternalAccount | ExternalAccount | Payment
 
 class Tables(str, Enum):
 	EXTERNAL_ACCOUNT = "ExternalAccount"
@@ -19,30 +18,29 @@ class Database():
 	tables = {
 		Tables.EXTERNAL_ACCOUNT: {},
 		Tables.INTERNAL_ACCOUNT: {},
-		Tables.PAYMENT: {}
+		Tables.PAYMENT: {},
+		Tables.ORGANIZATION: {
+			'tester-1': {
+				"record_id": "tester-1",
+				"name": "Test Organization"
+			}
+		}
 	}
 
 	def set(self, record: Record) -> str:
-		table_name = Tables(type(record.data).__name__)
-		record_id = record.record_id
+		table_name = Tables(type(record).__name__)
+		record.record_id = str(uuid.uuid4())
 
-		if not record_id:
-			record_id = str(uuid.uuid4())
+		self.tables[table_name][record.record_id] = record
 
-		self.tables[table_name][record_id] = record.data
-
-		return record_id
+		return record.record_id
 
 	def delete(self, table_name: Tables, record_id: str):
 		del self.tables[table_name][record_id]
 
 	def get(self, table_name: Tables, record_id: str) -> Record | None:
-		data = self.tables[table_name].get(record_id)
-
-		if not data:
-			return
-
-		return Record(record_id=record_id, table_name=table_name, data=data)
+		record = self.tables[table_name].get(record_id)
+		return record
 
 	def get_by_condition(self, table_name, col, value):
 		return [row for row in self.tables[table_name].values() if getattr(row, col) == value]

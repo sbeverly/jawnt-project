@@ -1,7 +1,10 @@
 from enum import Enum
 from pydantic import BaseModel
 
-class Account(BaseModel):
+class Record(BaseModel):
+	record_id: str | None = None
+
+class Account(Record):
 	account_id: str
 	name: str
 
@@ -16,8 +19,11 @@ class PaymentStatus(str, Enum):
 	SUCCESS = "SUCCESS"
 	FAILURE = "FAILURE"
 
-class Payment(BaseModel):
-	internal_account_id: str
-	external_account_id: str
-	amount: str
+class Payment(Record):
+	internal_account_record_id: str
+	external_account_record_id: str
+	amount: int
 	status: PaymentStatus = PaymentStatus.PENDING
+
+class Organization(Record):
+	name: str
