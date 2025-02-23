@@ -1,20 +1,35 @@
+"use client";
+
+import AccountView, { Account } from "@/components/AccountView";
 import { LinkAccountLarge } from "@/components/LinkAccount";
-import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Home() {
-	// TODO: fetch accounts for user
-	// let data = await fetch("/accounts/payments/list/{organization_id}")
-	// let accounts = data.json()
+	const [accounts, setAccounts] = useState<[Account]>();
 
-	const accounts = [{}];
+	const getAccounts = async () => {
+		const data = await fetch(
+			"http://localhost:8000/accounts/external/tester-1",
+		);
+		const response = await data.json();
+		setAccounts(response);
+	};
 
-	if (accounts.length > 0) {
-		return redirect("/accounts");
+	useEffect(() => {
+		getAccounts();
+	}, []);
+
+	if (!accounts) {
+		return <div>loading</div>;
+	}
+
+	if (accounts && accounts.length) {
+		return <AccountView accounts={accounts} />;
 	}
 
 	return (
 		<div className="flex justify-center items-center h-screen">
-			<LinkAccountLarge />
+			<LinkAccountLarge onComplete={getAccounts} />
 		</div>
 	);
 }

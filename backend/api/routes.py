@@ -1,13 +1,16 @@
 from fastapi import FastAPI, HTTPException
 
 from backend.lib.database import Database, Tables
-from backend.lib.models import InternalAccount, Payment, PaymentStatus
+from backend.lib.models import InternalAccount, Payment, PaymentStatus, PaymentType
 from backend.lib.plaid import extract_accounts, get_linked_accounts, get_plaid_client, create_link_token
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from backend.lib.queue import PaymentQueue
+
 app = FastAPI()
 db = Database()
+q = PaymentQueue()
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,7 +24,7 @@ class CreateExternalAccountRequest(BaseModel):
 	public_token: str | None
 
 # For expediency, this route will simply persist the account details
-# passed by the internal superuser.
+# passed by the internal superuser without any validation / authentication etc
 class CreateInternalAccountRequest(BaseModel):
 	account: InternalAccount
 
@@ -81,15 +84,23 @@ def get_internal_account(record_id):
 def create_ach_debit(payload: CreatePaymentRequest):
 	payment = payload.payment
 	payment.status = PaymentStatus.PENDING
+	payment.type = PaymentType.DEBIT
 
-	return db.set(payment)
+	record_id = db.set(payment)
+	q.enqueue(payment)
+
+	return record_id
 
 @app.post("/payment/credit")
 def create_ach_credit(payload: CreatePaymentRequest):
 	payment = payload.payment
 	payment.status = PaymentStatus.PENDING
+	payment.type = PaymentType.CREDIT
 
-	return db.set(payment)
+	record_id = db.set(payment)
+	q.enqueue(payment)
+
+	return record_id
 
 @app.get("/accounts/external/{organization_id}")
 def get_account_list(organization_id: str):

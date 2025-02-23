@@ -1,19 +1,13 @@
 # lib/jawnt/client.py
 import time
-from enum import Enum
 from unittest.mock import patch
 import uuid
 from random import randint
 
 from pydantic import BaseModel
 
-from backend.lib.models import Payment
+from backend.lib.models import Payment, PaymentStatus
 from backend.lib.payment_processing import perform_ach_credit, perform_ach_debit
-
-class PaymentStatus(Enum):
-	PENDING = "PENDING"
-	SUCCESS = "SUCCESS"
-	FAILURE = "FAILURE"
 
 class PaymentResponse(BaseModel):
 	"""

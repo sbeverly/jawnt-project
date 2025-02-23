@@ -19,11 +19,16 @@ class PaymentStatus(str, Enum):
 	SUCCESS = "SUCCESS"
 	FAILURE = "FAILURE"
 
+class PaymentType(Enum):
+	DEBIT = "debit"
+	CREDIT = "credit"
+
 class Payment(Record):
 	internal_account_record_id: str
 	external_account_record_id: str
 	amount: int
 	status: PaymentStatus = PaymentStatus.PENDING
+	type: PaymentType
 
 class Organization(Record):
 	name: str

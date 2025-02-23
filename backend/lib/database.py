@@ -38,7 +38,7 @@ class Database():
 	def delete(self, table_name: Tables, record_id: str):
 		del self.tables[table_name][record_id]
 
-	def get(self, table_name: Tables, record_id: str) -> Record | None:
+	def get(self, table_name: Tables, record_id: str):
 		record = self.tables[table_name].get(record_id)
 		return record
 
