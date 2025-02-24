@@ -108,5 +108,9 @@ def get_account_list(organization_id: str):
 
 @app.get("/payments/account/{account_record_id}")
 def get_payments_list(account_record_id: str):
-	return db.show(Tables.PAYMENT)
+	# return db.show(Tables.PAYMENT)
 	return db.get_by_condition(Tables.PAYMENT, col="external_account_record_id", value=account_record_id)
+
+@app.get("/db")
+def get_db():
+	return db.show()

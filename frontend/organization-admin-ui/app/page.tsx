@@ -5,7 +5,7 @@ import { LinkAccountLarge } from "@/components/LinkAccount";
 import { useEffect, useState } from "react";
 
 export default function Home() {
-	const [accounts, setAccounts] = useState<[Account]>();
+	const [accounts, setAccounts] = useState<Account[]>();
 
 	const getAccounts = async () => {
 		const data = await fetch(
@@ -24,7 +24,7 @@ export default function Home() {
 	}
 
 	if (accounts && accounts.length) {
-		return <AccountView accounts={accounts} />;
+		return <AccountView />;
 	}
 
 	return (
