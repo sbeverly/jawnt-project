@@ -6,8 +6,7 @@ from backend.lib.payment_processing_client import PaymentResponse
 from backend.api.routes import db
 from backend.lib.payment_processing import perform_ach_debit
 
-
-# This is mostly pseudocode
+# NOTE: This is mostly pseudocode
 def process_payment(item: Payment) -> PaymentResponse:
 	internal_account_id = db.get(Tables.INTERNAL_ACCOUNT, item.internal_account_record_id).account_id
 	external_account_id = db.get(Tables.EXTERNAL_ACCOUNT, item.internal_account_record_id).account_id
