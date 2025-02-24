@@ -17,7 +17,7 @@ export interface Payment {
 export default function AccountView() {
 	const [accounts, setAccounts] = useState<Account[]>([]);
 	const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
-	const [accountData, setAccountData] = useState<AccountData[]>([]);
+	const [accountData, setAccountData] = useState<Payment[]>([]);
 
 	const getAccounts = async () => {
 		const data = await fetch(
