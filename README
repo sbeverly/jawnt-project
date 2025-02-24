@@ -1,3 +1,3 @@
 - The API is allows all of the functional requirements laid out in the assignment
-- The client code that pulls from the PaymentQueue is close to functional but mostly psuedocode
+- The client code that pulls from the PaymentQueue is close to functional but still contains some psuedocode
 - The App includes a seeded in-memory db that can be written to via the api and the ui to add internal and external accounts respectively
